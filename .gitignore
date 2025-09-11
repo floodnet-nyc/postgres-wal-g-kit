@@ -1,0 +1,10 @@
+/data
+/data*
+/backups
+/homedata
+.env
+.env*
+!.env*.sample
+
+shh
+shhh*

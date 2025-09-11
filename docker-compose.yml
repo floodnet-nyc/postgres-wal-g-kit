@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres-wal-g-kit
+    container_name: postgres-wal-g-kit
+    build:
+      context: .
+      args:
+        POSTGRES_IMAGE: timescale/timescaledb-ha:pg16-all
+        # POSTGRES_IMAGE: postgres:16
+    restart: always
+    env_file: .env
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+  # docker exec -it postgres-wal-g-kit wal-g-env PUSH backup-push /var/lib/postgresql/data

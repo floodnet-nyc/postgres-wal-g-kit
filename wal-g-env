@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# : "${WALG_PUSH_PREFIX:=${WALG_FETCH_PREFIX:-}}"
+
+set_walg_prefix() {
+  local url="$1"
+  if [ -z "$url" ]; then return; fi
+
+  unset WALG_FILE_PREFIX WALG_S3_PREFIX WALG_GS_PREFIX WALG_AZ_PREFIX
+  case "$url" in
+    azure://*) export WALG_AZ_PREFIX="$url" ;;
+    s3://*) export WALG_S3_PREFIX="$url" ;;
+    gs://*) export WALG_GS_PREFIX="$url" ;;
+    *) export WALG_FILE_PREFIX="$url" ;;
+  esac
+}
+
+set_walg_prefix_from_name() {
+  local url_var="WALG_${1^^}_PREFIX" # e.g. WALG_FETCH_PREFIX
+  set_walg_prefix "${!url_var:-}"
+}
+
+env_name="$1"; shift || true
+set_walg_prefix_from_name "$env_name"
+exec wal-g $@
+
+
+# Maps a URL (azure://, /, s3://, gs://) to the correct WAL-G env var(s)
+# Usage:
+#   wal-g-env fetch wal-fetch  "%f" "%p"          # uses $WALG_FETCH_PREFIX  -> wal-g wal-fetch
+#   wal-g-env push  wal-push   "%p"               # uses $WALG_PUSH_PREFIX   -> wal-g wal-push
+#   wal-g-env fetch backup-fetch "$PGDATA" LATEST # uses $WALG_FETCH_PREFIX  -> wal-g backup-fetch
+
+# cmd="$1"; shift || true
+# case "$cmd" in
+#   wal-fetch)        set_walg_prefix_required "FETCH";   exec wal-g wal-fetch "$@" ;;
+#   wal-push)         set_walg_prefix_required "PUSH";    exec wal-g wal-push "$@" ;;
+#   backup-fetch)     set_walg_prefix_required "FETCH";   exec wal-g backup-fetch "$@" ;;
+#   backup-push)      set_walg_prefix_required "PUSH";    exec wal-g backup-push "$@" ;;
+#   backup-list)      set_walg_prefix_required "FETCH";   exec wal-g backup-list "$@" ;;
+#   # custom aliases for specifying fetch or push explicitly
+#   backup-flist)     set_walg_prefix_required "FETCH";   exec wal-g backup-list "$@" ;;
+#   backup-plist)     set_walg_prefix_required "PUSH";    exec wal-g backup-list "$@" ;;
+#   *) echo "Usage: wal-g-env {fetch|push|backup-fetch|backup-push|backup-list|backup-flist|backup-plist} ..." >&2; exit 2 ;;
+# esac
