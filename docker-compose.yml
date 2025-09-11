@@ -6,7 +6,8 @@ services:
       context: .
       args:
         POSTGRES_IMAGE: timescale/timescaledb-ha:pg16-all
-        # POSTGRES_IMAGE: postgres:16
+        # POSTGRES_IMAGE: postgres:16  # TODO: test with generic postgres image (bring up fresh, make backup, restore)
+        # POSTGRES_IMAGE: timescale/timescaledb:latest-pg16  # TODO: test with smaller timescale image
     restart: always
     env_file: .env
     volumes:

@@ -19,7 +19,7 @@ set_pg_conf() {
 
 
 # If PGDATA is empty (no existing database), proceed to fetch backup
-if [ ! -s "$PGDATA/PG_VERSION" ]; then
+if [ ! -s "$PGDATA/PG_VERSION" ] && [ ! -z "$WALG_FETCH_PREFIX" ]; then
   echo "PGDATA is empty. Initiating WAL-G restore from backup..."
   mkdir -p "$PGDATA"
 
@@ -37,10 +37,11 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
   # Configure postgresql.conf for archive_mode and restore_command
   if [ -z "$WALG_PUSH_PREFIX" ]; then
     set_pg_conf "$PGDATA/postgresql.conf" "archive_mode" "off"
+    set_pg_conf "$PGDATA/postgresql.conf" "archive_command" ""
   else
     set_pg_conf "$PGDATA/postgresql.conf" "archive_mode" "on"
+    set_pg_conf "$PGDATA/postgresql.conf" "archive_command" "wal-g-env push wal-push \"%p\""
   fi
-  set_pg_conf "$PGDATA/postgresql.conf" "archive_command" "wal-g-env push wal-push \"%p\""
   set_pg_conf "$PGDATA/postgresql.conf" "restore_command" "wal-g-env fetch wal-fetch \"%f\" \"%p\""
   set_pg_conf "$PGDATA/postgresql.conf" "recovery_target_timeline" "latest"
   # Cleanup (stackgres)
