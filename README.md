@@ -13,22 +13,25 @@ Configure your storage credentials using environment variables (following the in
 cp .env.sample .env
 ```
 
-Bring it up:
+Start the restore process:
 ```bash
+docker compose up -d --build
+```
+
+### Re-run with the latest backup
+```bash
+docker compose down
+rm -r data  # or: mv data data1
 docker compose up -d
 ```
 
-This will begin the restore process.
-
-To re-run a restore, point the database to an empty data directory.
-
 ## Do a full base backup from this local copy
 ```bash
-# echo 'WALG_PUSH_PREFIX=/backups' >> .env
+# echo 'WALG_PUSH_PREFIX=/backups' >> .env  # if you aren't already
 docker exec -it postgres-wal-g-kit wal-g-env push backup-push /var/lib/postgresql/data
 ```
 
-### Test it out
+### Test the local base backup
 ```bash
 # clear
 docker compose down
@@ -38,7 +41,7 @@ rm -r data  # or: mv data data1
 echo 'WALG_FETCH_PREFIX=/backups' >> .env
 
 # bring it back up
-docker compose up -d --build && dl0 postgres-wal-g-kit
+docker compose up -d
 ```
 
 
@@ -54,24 +57,20 @@ docker exec -it postgres-wal-g-kit wal-g-env fetch backup-list --pretty --detail
 docker run -it --rm -v ${PWD}/data2:/backup --env-file .env postgres-wal-g-kit wal-g-env fetch backup-fetch /backup LATEST
 ```
 
-###
+### Pull incremental backups
 
 TODO pull incremental/wal/etc.?
 
 ```bash
-docker exec -it postgres-wal-g-kit wal-g-env fetch catchup-list
-docker exec -it postgres-wal-g-kit wal-g-env fetch catchup-fetch /var/lib/postgresql/data backup_name
-```
-
-```bash
-docker exec -it postgres-wal-g-kit wal-g-env fetch wal-show
+# docker exec -it postgres-wal-g-kit wal-g-env fetch catchup-list
+# docker exec -it postgres-wal-g-kit wal-g-env fetch catchup-fetch /var/lib/postgresql/data backup_name
+# docker exec -it postgres-wal-g-kit wal-g-env fetch wal-show
 ```
 
 
 ## Uninstall
 ```bash
 docker compose down
-
 rm -r ./data ./backups
 ```
 
