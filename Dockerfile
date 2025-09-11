@@ -35,10 +35,10 @@ WORKDIR /var/lib/postgresql
 COPY --from=builder /usr/local/bin/wal-g /usr/local/bin/wal-g
 
 # Wal-G env utility to choose backups interactively
-COPY wal-g-env /usr/local/bin/wal-g-env
+COPY scripts/wal-g-env /usr/local/bin/wal-g-env
 
 
 
 # Entrypoint + Command
-COPY restore.sh /usr/local/bin/restore.sh
+COPY scripts/restore.sh /usr/local/bin/restore.sh
 CMD ["/usr/local/bin/restore.sh"]
