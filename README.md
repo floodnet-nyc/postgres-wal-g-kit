@@ -1,5 +1,5 @@
 # Postgres + WAL-G Restore Kit
-Test an existing PostgreSQL backup locally.
+Test an existing PostgreSQL backup.
 
 It uses a custom image with a couple features:
  * built wal-g binary
@@ -20,6 +20,7 @@ docker compose up -d --build
 
 ### Re-run with the latest backup
 ```bash
+# tear down, and restart with a clean data directory
 docker compose down
 rm -r data  # or: mv data data1
 docker compose up -d
