@@ -68,6 +68,47 @@ TODO pull incremental/wal/etc.?
 # docker exec -it postgres-wal-g-kit wal-g-env fetch wal-show
 ```
 
+## No backup? Test like this
+```bash
+cat > .env <<"
+WALG_FETCH_PREFIX=/backups
+WALG_PUSH_PREFIX=/backups
+"
+docker compose up -d --build
+# wait for your database to come up
+
+docker exec -it postgres-wal-g-kit psql
+```
+
+```sql
+-- Maybe create a table or two
+CREATE TABLE test (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+INSERT INTO test (name) VALUES ('example1'), ('example2');
+SELECT * FROM test;
+```
+
+```bash
+# Do a full base backup
+docker exec -it postgres-wal-g-kit wal-g-env push backup-push /var/lib/postgresql/data
+
+# tear down
+docker compose down
+rm -r data
+
+# bring it back up
+docker compose up -d
+
+docker exec -it postgres-wal-g-kit psql
+```
+
+```sql
+SELECT * FROM test;
+```
 
 ## Uninstall
 ```bash
