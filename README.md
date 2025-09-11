@@ -18,7 +18,13 @@ Start the restore process:
 docker compose up -d --build
 ```
 
-### Re-run with the latest backup
+#### Uninstall
+```bash
+docker compose down
+rm -r ./data ./backups
+```
+
+#### Re-run with the latest backup
 ```bash
 # tear down, and restart with a clean data directory
 docker compose down
@@ -28,11 +34,11 @@ docker compose up -d
 
 ## Do a full base backup from this local copy
 ```bash
-# echo 'WALG_PUSH_PREFIX=/backups' >> .env  # if you aren't already
+# echo 'WALG_PUSH_PREFIX=/backups' >> .env  # if you aren't already (if you do, re-run `.. up -d`)
 docker exec -it postgres-wal-g-kit wal-g-env push backup-push /var/lib/postgresql/data
 ```
 
-### Test the local base backup
+#### Test the local base backup
 ```bash
 # clear
 docker compose down
@@ -48,17 +54,17 @@ docker compose up -d
 
 ## Manually restore
 
-### List available backups
+#### List available backups
 ```bash
 docker exec -it postgres-wal-g-kit wal-g-env fetch backup-list --pretty --detailed
 ```
 
-### Pull backup to new location
+#### Pull backup to new location
 ```bash
 docker run -it --rm -v ${PWD}/data2:/backup --env-file .env postgres-wal-g-kit wal-g-env fetch backup-fetch /backup LATEST
 ```
 
-### Pull incremental backups
+#### Pull incremental backups
 
 TODO pull incremental/wal/etc.?
 
@@ -69,6 +75,8 @@ TODO pull incremental/wal/etc.?
 ```
 
 ## No backup? Test like this
+
+#### Create backup
 ```bash
 cat > .env <<"
 WALG_FETCH_PREFIX=/backups
@@ -99,21 +107,19 @@ docker exec -it postgres-wal-g-kit wal-g-env push backup-push /var/lib/postgresq
 # tear down
 docker compose down
 rm -r data
+```
 
+#### Restore from backup
+```bash
 # bring it back up
 docker compose up -d
 
+# Let's see how we did
 docker exec -it postgres-wal-g-kit psql
 ```
 
 ```sql
 SELECT * FROM test;
-```
-
-## Uninstall
-```bash
-docker compose down
-rm -r ./data ./backups
 ```
 
 ## wal-g usage
