@@ -1,3 +1,6 @@
+ARG POSTGRES_IMAGE=postgres:16
+# ARG POSTGRES_IMAGE=timescale/timescaledb-ha:pg16-all
+
 # ----------------------------------------------------------------
 # Builder: use a generic, slim Debian to keep things minimal
 FROM golang:1.25.6 AS builder
@@ -33,9 +36,7 @@ COPY scripts/restore.sh /usr/local/bin/restore.sh
 
 # ----------------------------------------------------------------
 # Final: PostgreSQL with the wal-g binary copied in
-ARG POSTGRES_IMAGE=postgres:16
-# ARG POSTGRES_IMAGE=timescale/timescaledb-ha:pg16-all
-FROM $POSTGRES_IMAGE
+FROM ${POSTGRES_IMAGE:-postgres:16} AS postgres
 
 # Use standard data directory (base timescaledb image is non-standard)
 ENV PGDATA=/var/lib/postgresql/data
