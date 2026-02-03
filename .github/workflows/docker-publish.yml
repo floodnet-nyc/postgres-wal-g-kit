@@ -10,8 +10,8 @@ on:
   #   - cron: '24 19 * * *'
   push:
     branches: [ "main" ]
-    # # Publish semver tags as releases.
-    # tags: [ 'v*.*.*' ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
 
