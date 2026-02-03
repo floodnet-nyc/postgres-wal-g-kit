@@ -21,7 +21,7 @@ RUN git clone --single-branch https://github.com/wal-g/wal-g /tmp/wal-g && \
 # Show wal-g version
 RUN wal-g --version
 
-FROM alpine AS bin
+FROM debian:stable-slim AS bin
 
 COPY --from=builder /usr/local/bin/wal-g /usr/local/bin/
 
@@ -33,8 +33,8 @@ COPY scripts/restore.sh /usr/local/bin/restore.sh
 
 # ----------------------------------------------------------------
 # Final: PostgreSQL with the wal-g binary copied in
-ARG POSTGRES_IMAGE=-postgres:16
-ARG POSTGRES_IMAGE=timescale/timescaledb-ha:pg16-all
+ARG POSTGRES_IMAGE=postgres:16
+# ARG POSTGRES_IMAGE=timescale/timescaledb-ha:pg16-all
 FROM $POSTGRES_IMAGE
 
 # Use standard data directory (base timescaledb image is non-standard)
@@ -47,4 +47,5 @@ COPY --from=bin /usr/local/bin/* /usr/local/bin/
 #COPY --from=bin /usr/local/bin/wal-g-env /usr/local/bin/
 #COPY --from=bin /usr/local/bin/restore.sh /usr/local/bin/
 
-CMD ["/usr/local/bin/restore.sh"]
+ENTRYPOINT ["/usr/local/bin/restore.sh"]
+CMD ["postgres"]
